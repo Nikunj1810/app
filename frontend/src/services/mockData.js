@@ -3,6 +3,61 @@ import axios from "axios";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8001";
 const API = `${BACKEND_URL}/api`;
 
+// Mock data for development/fallback
+export const mockDoubts = [
+  {
+    id: "1",
+    question: "What is the derivative of x²?",
+    subject: "mathematics", 
+    question_type: "text",
+    answer: {
+      solution: "The derivative of x² is 2x",
+      steps: ["Apply the power rule", "Bring down the exponent", "Subtract 1 from the exponent"],
+      generated_at: "2024-01-15T10:30:00Z"
+    },
+    status: "answered",
+    created_at: "2024-01-15T10:25:00Z",
+    updated_at: "2024-01-15T10:30:00Z"
+  }
+];
+
+export const subjects = [
+  "mathematics",
+  "physics", 
+  "chemistry",
+  "biology",
+  "english",
+  "history",
+  "geography",
+  "computer science"
+];
+
+export const mockAIResponse = async (question, subject) => {
+  // Simulate AI processing delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  return {
+    id: Math.random().toString(36).substr(2, 9),
+    question,
+    subject,
+    question_type: "text",
+    answer: {
+      solution: `Here's a step-by-step solution for your ${subject} question: "${question}"`,
+      steps: [
+        "Understand the problem",
+        "Identify key concepts", 
+        "Apply relevant formulas",
+        "Calculate the result",
+        "Verify the answer"
+      ],
+      generated_at: new Date().toISOString()
+    },
+    status: "answered",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+};
+
 // API service for authentication
 export class AuthAPI {
   static async register(name, email, password) {
