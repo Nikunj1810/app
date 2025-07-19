@@ -127,7 +127,7 @@ const AskDoubePage = () => {
         subject,
         type: uploadedImage ? "image" : "text",
         image: uploadedImage,
-        answer: response,
+        answer: formattedResponse,
         userId: user?.id || "guest"
       };
 
