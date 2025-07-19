@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useToast } from "../hooks/use-toast";
 import { useDoubts } from "../context/DoubtsContext";
 import { useAuth } from "../context/AuthContext";
-import { mockAIResponse, subjects } from "../services/mockData";
+import { DoubtsAPI, subjects } from "../services/mockData";
 import { 
   Upload, 
   Camera, 
