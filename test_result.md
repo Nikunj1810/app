@@ -101,3 +101,111 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Enhance the existing FastAPI backend for an AI-powered doubt solver web app. The current system has basic functionality with Gemini AI integration. 
+  Need to add:
+  - OpenAI API integration alongside Gemini (dual AI provider support)
+  - Enhanced image upload handling with OCR capabilities using Tesseract
+  - Complete API endpoints matching Node.js + Express requirements:
+    * POST /api/questions/text - Process text questions
+    * POST /api/questions/image - Process image questions with OCR
+    * GET /api/questions/user/:userId - Get user question history  
+    * POST /api/auth/register & /api/auth/login - JWT authentication
+    * Optional: POST /api/chat/send - Chat functionality
+  - Better file upload handling (equivalent to Multer)
+  - Clean MVC structure maintenance
+  - MongoDB integration with proper models (User, Question, Chat logs)
+
+backend:
+  - task: "OpenAI Integration Setup"
+    implemented: false
+    working: false
+    file: "services/ai_service.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Need OpenAI API key from user before implementation"
+
+  - task: "OCR Integration with Tesseract"
+    implemented: false
+    working: false
+    file: "services/ocr_service.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Need to install and configure Tesseract OCR library"
+
+  - task: "Enhanced Image Upload Handling"
+    implemented: false
+    working: false
+    file: "routes/doubts.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Need to improve file upload with better validation"
+
+  - task: "API Endpoints Matching Requirements"
+    implemented: true
+    working: true
+    file: "routes/*.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Basic endpoints exist, need to verify they match exact requirements"
+
+  - task: "Chat Functionality (Optional)"
+    implemented: false
+    working: false
+    file: "routes/chat.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Optional feature - will implement if time permits"
+
+frontend:
+  - task: "Frontend Integration Testing"
+    implemented: true
+    working: true
+    file: "src/components/*"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Frontend exists and works with current backend, need to test with enhancements"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "OpenAI Integration Setup"
+    - "OCR Integration with Tesseract"
+    - "Enhanced Image Upload Handling"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Starting backend enhancement. Current FastAPI backend is functional with Gemini AI. Need to add OpenAI, OCR, and improve image handling. Waiting for OpenAI API key from user."
