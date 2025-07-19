@@ -17,6 +17,21 @@ class DoubtService:
     async def create_doubt(self, user_id: str, doubt_data: DoubtCreate) -> DoubtResponse:
         """Create a new doubt and process it with AI"""
         try:
+            # Initialize OCR data
+            ocr_data = None
+            
+            # If it's an image question, extract OCR data for additional context
+            if doubt_data.question_type == "image" and doubt_data.image_data:
+                ocr_result = self.ocr_service.extract_text_from_base64(doubt_data.image_data)
+                if ocr_result["success"]:
+                    ocr_data = {
+                        "extracted_text": ocr_result["extracted_text"],
+                        "confidence_scores": ocr_result["confidence_scores"],
+                        "preprocessing_used": ocr_result["preprocessing_used"],
+                        "average_confidence": ocr_result.get("average_confidence", 0)
+                    }
+                    logger.info(f"OCR extraction successful: {len(ocr_result['extracted_text'])} characters extracted")
+            
             # Create doubt instance
             doubt = Doubt(
                 user_id=user_id,
@@ -24,6 +39,7 @@ class DoubtService:
                 subject=doubt_data.subject,
                 question_type=doubt_data.question_type,
                 image_data=doubt_data.image_data,
+                ocr_data=ocr_data,
                 status="processing"
             )
             
@@ -33,8 +49,14 @@ class DoubtService:
             # Process with AI in background (for now, process immediately)
             try:
                 if doubt_data.question_type == "image" and doubt_data.image_data:
+                    # For image questions, use enhanced question with OCR context
+                    enhanced_question = doubt_data.question
+                    if ocr_data and ocr_data["extracted_text"]:
+                        context_info = f"\n\nOCR extracted text (confidence: {ocr_data.get('average_confidence', 0):.1f}%): {ocr_data['extracted_text']}"
+                        enhanced_question += context_info
+                    
                     answer = await self.ai_service.process_image_question(
-                        doubt_data.question,
+                        enhanced_question,
                         doubt_data.subject,
                         doubt_data.image_data
                     )
@@ -73,6 +95,7 @@ class DoubtService:
                 subject=doubt.subject,
                 question_type=doubt.question_type,
                 image_data=doubt.image_data,
+                ocr_data=doubt.ocr_data,
                 answer=doubt.answer,
                 status=doubt.status,
                 created_at=doubt.created_at,
