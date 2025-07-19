@@ -114,39 +114,77 @@ export class AuthAPI {
 
 // API service for doubts
 export class DoubtsAPI {
-  static async createDoubt(question, subject, questionType = "text", imageData = null, token = null) {
+  static async createTextQuestion(question, subject, token) {
     try {
-      const data = {
-        question,
-        subject,
-        question_type: questionType,
-        ...(imageData && { image_data: imageData })
+      const data = { question, subject };
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       };
 
-      const config = token ? {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      } : {};
-
-      // Use demo endpoint if no token (for guest users)
-      const endpoint = token ? `${API}/doubts/` : `${API}/doubts/demo`;
-      
-      const response = await axios.post(endpoint, data, config);
+      const response = await axios.post(`${API}/questions/text`, data, config);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.detail || "Failed to create doubt");
+      throw new Error(error.response?.data?.detail || "Failed to create text question");
     }
   }
 
-  static async getUserDoubts(token, skip = 0, limit = 50) {
+  static async createImageQuestion(file, question, subject, token) {
     try {
-      const response = await axios.get(`${API}/doubts/?skip=${skip}&limit=${limit}`, {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('question', question || '');
+      formData.append('subject', subject);
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+
+      const response = await axios.post(`${API}/questions/image`, formData, config);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.detail || "Failed to create image question");
+    }
+  }
+
+  static async getUserQuestions(userId, token, skip = 0, limit = 50) {
+    try {
+      const response = await axios.get(`${API}/questions/user/${userId}?skip=${skip}&limit=${limit}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.detail || "Failed to get questions");
+    }
+  }
+
+  // Legacy methods for backward compatibility
+  static async createDoubt(question, subject, questionType = "text", imageData = null, token = null) {
+    if (questionType === "text") {
+      return this.createTextQuestion(question, subject, token);
+    } else {
+      // For image type, we'll need to convert base64 back to file
+      throw new Error("Use createImageQuestion for image uploads");
+    }
+  }
+
+  static async getUserDoubts(token, skip = 0, limit = 50) {
+    try {
+      // Get current user first to get user ID
+      const userResponse = await axios.get(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const userId = userResponse.data.id;
+      
+      return this.getUserQuestions(userId, token, skip, limit);
     } catch (error) {
       throw new Error(error.response?.data?.detail || "Failed to get doubts");
     }
@@ -175,6 +213,41 @@ export class DoubtsAPI {
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.detail || "Failed to delete doubt");
+    }
+  }
+}
+
+// Chat API service
+export class ChatAPI {
+  static async sendMessage(message, doubtId = null, token) {
+    try {
+      const data = { message, doubt_id: doubtId };
+      
+      const response = await axios.post(`${API}/chat/send`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.detail || "Failed to send message");
+    }
+  }
+
+  static async getMessages(doubtId = null, token, limit = 50) {
+    try {
+      const params = { limit };
+      if (doubtId) params.doubt_id = doubtId;
+      
+      const response = await axios.get(`${API}/chat/messages`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.detail || "Failed to get messages");
     }
   }
 }
