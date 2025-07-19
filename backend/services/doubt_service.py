@@ -12,6 +12,7 @@ class DoubtService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
         self.ai_service = AIService()
+        self.ocr_service = OCRService()
     
     async def create_doubt(self, user_id: str, doubt_data: DoubtCreate) -> DoubtResponse:
         """Create a new doubt and process it with AI"""
