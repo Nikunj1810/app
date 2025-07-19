@@ -58,9 +58,11 @@ async def get_status_checks():
 # Create and include routers
 auth_router = create_auth_router(db)
 doubts_router = create_doubts_router(db, auth_router.get_current_user)
+chat_router = create_chat_router(db, auth_router.get_current_user)
 
 api_router.include_router(auth_router)
 api_router.include_router(doubts_router)
+api_router.include_router(chat_router)
 
 # Include the main router in the app
 app.include_router(api_router)
