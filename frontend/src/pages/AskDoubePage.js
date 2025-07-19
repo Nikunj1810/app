@@ -90,6 +90,17 @@ const AskDoubePage = () => {
     setAiResponse(null);
 
     try {
+      // Check if user is logged in
+      if (!user || !user.token) {
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to ask questions",
+          variant: "destructive",
+        });
+        navigate('/login');
+        return;
+      }
+
       // Call the enhanced backend API
       let response;
       if (uploadedImage) {
