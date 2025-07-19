@@ -1,10 +1,29 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, File, UploadFile, Form
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from models.doubt import DoubtCreate, DoubtResponse
+from models.doubt import DoubtCreate, DoubtResponse, ImageQuestionCreate
 from models.user import UserResponse
 from services.doubt_service import DoubtService
-from typing import List
+from services.ocr_service import OCRService
+from typing import List, Optional
 import logging
+import base64
+import aiofiles
+import tempfile
+import os
+from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
+
+class TextQuestionRequest(BaseModel):
+    question: str
+    subject: str
+
+class ImageUploadResponse(BaseModel):
+    success: bool
+    message: str
+    ocr_text: Optional[str] = None
+    image_base64: Optional[str] = None
+    processing_info: Optional[dict] = None
 
 logger = logging.getLogger(__name__)
 
