@@ -90,14 +90,36 @@ const AskDoubePage = () => {
     setAiResponse(null);
 
     try {
-      // Simulate AI processing with mock response
-      const response = await mockAIResponse(
-        question || "Image-based question", 
-        subject, 
-        uploadedImage
-      );
+      // Call the enhanced backend API
+      let response;
+      if (uploadedImage) {
+        // Convert base64 to File object for image upload
+        const base64Data = uploadedImage.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const file = new File([byteArray], 'image.png', { type: 'image/png' });
+        
+        response = await DoubtsAPI.createImageQuestion(file, question, subject, user.token);
+      } else {
+        response = await DoubtsAPI.createTextQuestion(question, subject, user.token);
+      }
 
-      setAiResponse(response);
+      // Format the response to match frontend expectations
+      const formattedResponse = {
+        id: response.id,
+        question: response.question,
+        subject: response.subject,
+        solution: response.answer?.solution || "Processing...",
+        steps: response.answer?.steps || [],
+        status: response.status,
+        created_at: response.created_at
+      };
+
+      setAiResponse(formattedResponse);
 
       // Add to doubts history
       const newDoubt = {
