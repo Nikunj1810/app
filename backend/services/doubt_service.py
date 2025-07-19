@@ -1,6 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from models.doubt import Doubt, DoubtCreate, DoubtResponse
 from services.ai_service import AIService
+from services.ocr_service import OCRService
 from typing import List, Optional
 import logging
 from datetime import datetime
