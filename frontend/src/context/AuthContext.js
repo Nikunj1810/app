@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { AuthAPI } from "../services/mockData";
 
 const AuthContext = createContext();
 
@@ -13,55 +14,82 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
     // Check if user is logged in from localStorage
     const savedUser = localStorage.getItem("doubtSolverUser");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    const savedToken = localStorage.getItem("doubtSolverToken");
+    
+    if (savedUser && savedToken) {
+      try {
+        setUser(JSON.parse(savedUser));
+        setToken(savedToken);
+      } catch (error) {
+        // Clear invalid data
+        localStorage.removeItem("doubtSolverUser");
+        localStorage.removeItem("doubtSolverToken");
+      }
     }
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    // Mock login - in real app, this would call backend API
-    if (email && password) {
-      const mockUser = {
-        id: "user_123",
-        email: email,
-        name: email.split("@")[0],
-        joinDate: new Date().toISOString(),
-      };
-      setUser(mockUser);
-      localStorage.setItem("doubtSolverUser", JSON.stringify(mockUser));
-      return { success: true };
+    try {
+      const response = await AuthAPI.login(email, password);
+      
+      if (response.success) {
+        setUser(response.user);
+        setToken(response.access_token);
+        localStorage.setItem("doubtSolverUser", JSON.stringify(response.user));
+        localStorage.setItem("doubtSolverToken", response.access_token);
+        return { success: true };
+      }
+      
+      return { success: false, error: response.message || "Login failed" };
+    } catch (error) {
+      return { success: false, error: error.message || "Login failed" };
     }
-    return { success: false, error: "Invalid credentials" };
   };
 
   const register = async (name, email, password) => {
-    // Mock register - in real app, this would call backend API
-    if (name && email && password) {
-      const mockUser = {
-        id: "user_" + Math.random().toString(36).substr(2, 9),
-        email: email,
-        name: name,
-        joinDate: new Date().toISOString(),
-      };
-      setUser(mockUser);
-      localStorage.setItem("doubtSolverUser", JSON.stringify(mockUser));
-      return { success: true };
+    try {
+      const response = await AuthAPI.register(name, email, password);
+      
+      if (response.success) {
+        setUser(response.user);
+        setToken(response.access_token);
+        localStorage.setItem("doubtSolverUser", JSON.stringify(response.user));
+        localStorage.setItem("doubtSolverToken", response.access_token);
+        return { success: true };
+      }
+      
+      return { success: false, error: response.message || "Registration failed" };
+    } catch (error) {
+      return { success: false, error: error.message || "Registration failed" };
     }
-    return { success: false, error: "All fields are required" };
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("doubtSolverUser");
+  const logout = async () => {
+    try {
+      if (token) {
+        await AuthAPI.logout(token);
+      }
+    } catch (error) {
+      // Ignore logout API errors
+      console.error("Logout API error:", error);
+    } finally {
+      // Always clear local data
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem("doubtSolverUser");
+      localStorage.removeItem("doubtSolverToken");
+    }
   };
 
   const value = {
     user,
+    token,
     login,
     register,
     logout,
