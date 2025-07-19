@@ -121,6 +121,7 @@ class DoubtService:
                     subject=doubt_doc["subject"],
                     question_type=doubt_doc["question_type"],
                     image_data=doubt_doc.get("image_data"),
+                    ocr_data=doubt_doc.get("ocr_data"),
                     answer=doubt_doc.get("answer"),
                     status=doubt_doc["status"],
                     created_at=doubt_doc["created_at"],
