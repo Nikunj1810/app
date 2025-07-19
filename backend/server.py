@@ -13,6 +13,7 @@ from datetime import datetime
 # Import our new modules
 from routes.auth import create_auth_router
 from routes.doubts import create_doubts_router
+from routes.chat import create_chat_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
